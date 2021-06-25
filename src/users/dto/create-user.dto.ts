@@ -1,4 +1,5 @@
 import { IsString, IsEmail, IsNotEmpty } from 'class-validator';
+import { Observable } from 'rxjs';
 
 export class CreateUserDto {
   @IsString()
@@ -8,5 +9,5 @@ export class CreateUserDto {
   readonly email: string;
 
   @IsNotEmpty()
-  readonly password: string;
+  password: string;
 }

@@ -1,12 +1,9 @@
-import { IsNumberString, IsString } from 'class-validator';
+import { IsEmail, IsString } from 'class-validator';
 
 export class FindAllUserDto {
   @IsString()
-  name: string;
+  name?: string;
 
-  @IsNumberString()
-  page: number;
-
-  @IsNumberString()
-  limit: number;
+  @IsEmail()
+  email?: string;
 }
