@@ -14,6 +14,10 @@ export class UserRepository {
     return newUser.save();
   }
 
+  async findOne(query: FindAllUserDto): Promise<User> {
+    return this.userModel.findOne(query);
+  }
+
   async find(query: FindAllUserDto): Promise<User[]> {
     return this.userModel.find(query);
   }

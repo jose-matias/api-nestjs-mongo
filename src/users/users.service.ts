@@ -1,15 +1,44 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserDto, FindAllUserDto, UpdateUserDto } from './dto';
+import { BadGatewayException, ForbiddenException, Injectable } from '@nestjs/common';
+import { AuthUserDto, CreateUserDto, FindAllUserDto, UpdateUserDto } from './dto';
 
+import { Login } from './interfaces/user.interface';
 import { User } from './schemas/user.schema';
 import { UserRepository } from './users.repository';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(private readonly userRepository: UserRepository, private readonly authService: AuthService) {}
+
+  async login(data: AuthUserDto): Promise<Login> {
+    const user = await this.findOne({ email: data.email });
+
+    if (!user) {
+      throw new ForbiddenException('Invalid credentials');
+    }
+
+    const token = await this.authService.generateJWT(user);
+
+    if (!this.authService.comparePassword(data.password, user.password)) {
+      throw new ForbiddenException('Invalid credentials');
+    }
+
+    return {
+      user,
+      token,
+    };
+  }
 
   async create(data: CreateUserDto): Promise<User> {
+    if (await this.findOne({ email: data.email })) {
+      throw new BadGatewayException('User already exists');
+    }
+
     return this.userRepository.create(data);
+  }
+
+  async findOne(query: FindAllUserDto): Promise<User> {
+    return this.userRepository.findOne(query);
   }
 
   async findAll(query: FindAllUserDto): Promise<User[]> {

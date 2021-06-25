@@ -1,15 +1,24 @@
-import { Body, Controller, Post, Get, Patch, Delete, Query, Param, NotFoundException } from '@nestjs/common';
-import { CreateUserDto, FindOneUserDto, FindAllUserDto, UpdateUserDto } from './dto';
+import { Body, Controller, Post, Get, Patch, Delete, Query, Param, NotFoundException, HttpCode } from '@nestjs/common';
+import { AuthUserDto, CreateUserDto, FindOneUserDto, FindAllUserDto, UpdateUserDto } from './dto';
 
 import { User } from './schemas/user.schema';
 import { UsersService } from './users.service';
+import { AuthService } from '../auth/auth.service';
+import { Login } from './interfaces/user.interface';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userService: UsersService) {}
+  constructor(private readonly userService: UsersService, private readonly authService: AuthService) {}
+
+  @Post('login')
+  @HttpCode(200)
+  async login(@Body() authUserDto: AuthUserDto): Promise<Login> {
+    return this.userService.login(authUserDto);
+  }
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
+    createUserDto.password = await this.authService.hashPassword(createUserDto.password);
     return this.userService.create(createUserDto);
   }
 
